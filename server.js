@@ -1,17 +1,33 @@
 import http from "http";
 import { createBareServer } from "@tomphttp/bare-server-node";
 
-// Create the Bare server (Ultraviolet core)
-const bare = createBareServer("/bare/");
+const bare = createBareServer("/bare/"); // must match frontend prefix
 
-// Create an HTTP server
 const server = http.createServer((req, res) => {
   try {
-    // Check if Bare should handle the request
+    // CORS headers
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "*");
+
+    // Handle preflight OPTIONS requests
+    if (req.method === "OPTIONS") {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
+    // Simple homepage
+    if (req.url === "/" || req.url === "/index.html") {
+      res.writeHead(200, { "Content-Type": "text/html" });
+      res.end("<h1>✅ UV Backend Running!</h1>");
+      return;
+    }
+
+    // Route Bare server requests
     if (bare.shouldRoute(req)) {
       bare.routeRequest(req, res);
     } else {
-      // Only send 404 if headers not already sent
       if (!res.headersSent) {
         res.writeHead(404, { "Content-Type": "text/plain" });
         res.end("Not Found");
@@ -26,7 +42,7 @@ const server = http.createServer((req, res) => {
   }
 });
 
-// Handle WebSocket / upgrade requests
+// WebSocket / upgrades
 server.on("upgrade", (req, socket, head) => {
   try {
     if (bare.shouldRoute(req)) {
@@ -40,7 +56,6 @@ server.on("upgrade", (req, socket, head) => {
   }
 });
 
-// Start the server
 const port = process.env.PORT || 8080;
 server.listen(port, () => {
   console.log(`✅ UV backend running on port ${port}`);
