@@ -10,6 +10,7 @@ const server = http.createServer((req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "https://bittt0.github.io");
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "*");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
 
     // Handle preflight OPTIONS requests
     if (req.method === "OPTIONS") {
