@@ -1,12 +1,13 @@
 import http from "http";
 import { createBareServer } from "@tomphttp/bare-server-node";
 
-const bare = createBareServer("/bare/"); // must match frontend prefix
+// Create Bare server (must match frontend prefix)
+const bare = createBareServer("/bare/");
 
 const server = http.createServer((req, res) => {
   try {
-    // CORS headers
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    // CORS headers (allow GitHub Pages frontend)
+    res.setHeader("Access-Control-Allow-Origin", "https://bittt0.github.io");
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "*");
 
@@ -17,7 +18,7 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    // Simple homepage
+    // Root URL for testing
     if (req.url === "/" || req.url === "/index.html") {
       res.writeHead(200, { "Content-Type": "text/html" });
       res.end("<h1>✅ UV Backend Running!</h1>");
@@ -42,7 +43,7 @@ const server = http.createServer((req, res) => {
   }
 });
 
-// WebSocket / upgrades
+// Handle WebSocket / upgrades
 server.on("upgrade", (req, socket, head) => {
   try {
     if (bare.shouldRoute(req)) {
@@ -56,6 +57,7 @@ server.on("upgrade", (req, socket, head) => {
   }
 });
 
+// Start server
 const port = process.env.PORT || 8080;
 server.listen(port, () => {
   console.log(`✅ UV backend running on port ${port}`);
